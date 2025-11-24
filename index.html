@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android Emulator Pro</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #111827; color: white; }
+        /* Tailwind-like utilities */
+        .hidden { display: none; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .w-full { width: 100%; }
+        .h-screen { height: 100vh; }
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .bg-gray-700 { background-color: #374151; }
+        .bg-gray-800 { background-color: #1f2937; }
+        .bg-gray-900 { background-color: #111827; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-green-600 { background-color: #16a34a; }
+        .text-gray-400 { color: #9ca3af; }
+        .text-blue-400 { color: #60a5fa; }
+        .text-green-400 { color: #4ade80; }
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .font-bold { font-weight: 700; }
+        .font-mono { font-family: monospace; }
+        .rounded { border-radius: 0.25rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-3xl { border-radius: 1.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .border { border-width: 1px; }
+        .border-gray-600 { border-color: #4b5563; }
+        .cursor-pointer { cursor: pointer; }
+        .transition { transition: all 0.2s; }
+        .hover\:bg-gray-600:hover { background-color: #4b5563; }
+        .absolute { position: absolute; }
+        .relative { position: relative; }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- Custom Icon Components (To fix the broken dependency) ---
+        const Icon = ({ path, className, color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {path}
+            </svg>
+        );
+
+        const Icons = {
+            Play: (props) => <Icon {...props} path={<polygon points="5 3 19 12 5 21 5 3" />} />,
+            Square: (props) => <Icon {...props} path={<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />} />,
+            RotateCw: (props) => <Icon {...props} path={<path d="M23 4v6h-6M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />} />,
+            Wifi: (props) => <Icon {...props} path={<path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01" />} />,
+            Shield: (props) => <Icon {...props} path={<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />} />,
+            Download: (props) => <Icon {...props} path={<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />} />,
+            Upload: (props) => <Icon {...props} path={<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />} />,
+            Smartphone: (props) => <Icon {...props} path={<rect x="5" y="2" width="14" height="20" rx="2" ry="2" />} />,
+            Menu: (props) => <Icon {...props} path={<line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />} />,
+            X: (props) => <Icon {...props} path={<line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />} />,
+            CheckCircle: (props) => <Icon {...props} path={<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />} />,
+            AlertCircle: (props) => <Icon {...props} path={<circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />} />,
+            Package: (props) => <Icon {...props} path={<line x1="16.5" y1="9.4" x2="7.5" y2="4.21" /><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" />} />
+        };
+
+        function AndroidEmulator() {
+            const [isRunning, setIsRunning] = React.useState(false);
+            const [orientation, setOrientation] = React.useState('portrait');
+            const [proxyEnabled, setProxyEnabled] = React.useState(false);
+            const [activeTab, setActiveTab] = React.useState('apps');
+            const [logs, setLogs] = React.useState([]);
+            const [installedApps, setInstalledApps] = React.useState([]);
+            const [traffic, setTraffic] = React.useState([]);
+            const [captureTraffic, setCaptureTraffic] = React.useState(false);
+            const [currentApp, setCurrentApp] = React.useState(null);
+            const [apkUrl, setApkUrl] = React.useState('');
+            const [isProcessing, setIsProcessing] = React.useState(false);
+            
+            // Stats
+            const [stats, setStats] = React.useState({ cpu: '0%', mem: '0/2048 MB' });
+
+            const canvasRef = React.useRef(null);
+
+            // Simulation Loop
+            React.useEffect(() => {
+                if(!isRunning) return;
+                const interval = setInterval(() => {
+                    setStats({
+                        cpu: Math.floor(Math.random() * 40 + 10) + '%',
+                        mem: Math.floor(Math.random() * 500 + 800) + '/2048 MB'
+                    });
+                }, 2000);
+                return () => clearInterval(interval);
+            }, [isRunning]);
+
+            // Draw Screen
+            React.useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                
+                // Clear
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0,0, canvas.width, canvas.height);
+
+                if (!isRunning) {
+                    ctx.fillStyle = '#333';
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("Emulator Off", canvas.width/2, canvas.height/2);
+                    return;
+                }
+
+                // Wallpaper
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#4c1d95');
+                gradient.addColorStop(1, '#1e1b4b');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Status Bar
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(0, 0, canvas.width, 25);
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText("12:00 PM", 10, 17);
+                if(proxyEnabled) ctx.fillText("🔒 Proxy", canvas.width - 60, 17);
+
+                // App Screen or Home
+                if (currentApp) {
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 25, canvas.width, canvas.height-25);
+                    ctx.fillStyle = '#000';
+                    ctx.textAlign = 'center';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.fillText(currentApp.name, canvas.width/2, 100);
+                    ctx.font = '14px Arial';
+                    ctx.fillStyle = '#666';
+                    ctx.fillText("Processing Data...", canvas.width/2, 130);
+                } else {
+                    // Home Icons
+                    ctx.textAlign = 'center';
+                    installedApps.forEach((app, i) => {
+                        const x = 50 + (i % 3) * 90;
+                        const y = 80 + Math.floor(i / 3) * 100;
+                        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                        ctx.fillRect(x-30, y-30, 60, 60);
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '12px Arial';
+                        ctx.fillText(app.name.substring(0,8), x, y + 45);
+                        ctx.font = '24px Arial';
+                        ctx.fillText(app.name[0], x, y + 8);
+                    });
+                    
+                    if(installedApps.length === 0) {
+                        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                        ctx.font = '14px Arial';
+                        ctx.fillText("No Apps Installed", canvas.width/2, canvas.height/2);
+                    }
+                }
+
+            }, [isRunning, currentApp, installedApps, orientation]);
+
+            const addLog = (msg, type='info') => {
+                setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev].slice(0, 50));
+            };
+
+            const installApp = () => {
+                setIsProcessing(true);
+                setTimeout(() => {
+                    const names = ['BankApp', 'SocialNet', 'SecureChat', 'CryptoWallet'];
+                    const name = names[Math.floor(Math.random()*names.length)] + ' ' + Math.floor(Math.random()*100);
+                    setInstalledApps(prev => [...prev, { id: Date.now(), name }]);
+                    addLog(`Installed package: com.example.${name.toLowerCase().replace(' ', '')}`);
+                    setIsProcessing(false);
+                }, 1000);
+            };
+
+            const toggleEmulator = () => {
+                setIsRunning(!isRunning);
+                addLog(isRunning ? "Emulator shutdown" : "Booting Android System...");
+                if(isRunning) setCurrentApp(null);
+            };
+
+            // Traffic Simulator
+            React.useEffect(() => {
+                if(!isRunning || !currentApp || !captureTraffic || !proxyEnabled) return;
+                
+                const interval = setInterval(() => {
+                    const methods = ['GET', 'POST', 'PUT'];
+                    const endpoints = ['/api/auth', '/v1/data', '/user/profile', '/config/init'];
+                    const status = [200, 201, 401, 403, 500];
+                    
+                    const req = {
+                        id: Date.now(),
+                        method: methods[Math.floor(Math.random()*methods.length)],
+                        url: 'https://api.target.com' + endpoints[Math.floor(Math.random()*endpoints.length)],
+                        status: status[Math.floor(Math.random()*status.length)],
+                        size: Math.floor(Math.random()*5000) + 'B'
+                    };
+                    setTraffic(prev => [req, ...prev]);
+                }, 2000);
+                return () => clearInterval(interval);
+            }, [isRunning, currentApp, captureTraffic, proxyEnabled]);
+
+            return (
+                <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
+                    {/* Main Area */}
+                    <div className="flex-1 flex flex-col items-center justify-center relative p-4">
+                        {/* Device Frame */}
+                        <div className="relative bg-gray-800 rounded-3xl p-4 shadow-2xl border-4 border-gray-700"
+                             style={{
+                                 width: orientation === 'portrait' ? '360px' : '640px',
+                                 height: orientation === 'portrait' ? '640px' : '360px',
+                                 transition: 'all 0.3s'
+                             }}>
+                             
+                            {/* Screen Canvas */}
+                            <canvas 
+                                ref={canvasRef} 
+                                width={orientation === 'portrait' ? 320 : 600} 
+                                height={orientation === 'portrait' ? 560 : 280}
+                                className="w-full h-full bg-black rounded-xl cursor-pointer"
+                                onClick={(e) => {
+                                    if(!isRunning) return;
+                                    // Simple hit detection for apps
+                                    if(!currentApp && installedApps.length > 0) {
+                                        // Just launch the last installed app for demo simplicity
+                                        // In real code we'd calculate X/Y
+                                        const rect = e.target.getBoundingClientRect();
+                                        // Random launch for click demo
+                                        const app = installedApps[Math.floor(Math.random() * installedApps.length)];
+                                        setCurrentApp(app);
+                                        addLog(`Launched ${app.name}`);
+                                    }
+                                }}
+                            />
+
+                            {/* Hardware Buttons */}
+                            <div className="absolute -right-3 top-20 w-1 h-12 bg-gray-600 rounded-r"></div>
+                            <div className="absolute -right-3 top-36 w-1 h-12 bg-gray-600 rounded-r"></div>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="mt-8 flex gap-4">
+                            <button onClick={toggleEmulator} className={`p-3 rounded-full ${isRunning ? 'bg-red-600' : 'bg-green-600'} hover:opacity-80`}>
+                                {isRunning ? <Icons.Square className="w-6 h-6"/> : <Icons.Play className="w-6 h-6"/>}
+                            </button>
+                            <button onClick={() => setOrientation(o => o === 'portrait' ? 'landscape' : 'portrait')} className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
+                                <Icons.RotateCw className="w-6 h-6"/>
+                            </button>
+                            <button onClick={() => setCurrentApp(null)} className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
+                                <Icons.Smartphone className="w-6 h-6"/>
+                            </button>
+                        </div>
+
+                        {/* Stats Overlay */}
+                        <div className="absolute top-4 left-4 text-xs text-gray-500 font-mono">
+                            <div>CPU: {stats.cpu}</div>
+                            <div>MEM: {stats.mem}</div>
+                            <div>ADB: Connected</div>
+                        </div>
+                    </div>
+
+                    {/* Side Panel */}
+                    <div className="w-96 bg-gray-800 border-l border-gray-700 flex flex-col">
+                        <div className="p-4 border-b border-gray-700 font-bold flex justify-between">
+                            <span>DevTools</span>
+                            <Icons.Terminal className="w-5 h-5 text-gray-400"/>
+                        </div>
+                        
+                        {/* Tabs */}
+                        <div className="flex border-b border-gray-700">
+                            {['apps', 'proxy', 'traffic', 'logs'].map(t => (
+                                <button 
+                                    key={t}
+                                    onClick={() => setActiveTab(t)}
+                                    className={`flex-1 py-3 text-sm capitalize ${activeTab === t ? 'bg-gray-700 text-blue-400 border-b-2 border-blue-400' : 'text-gray-400'}`}
+                                >{t}</button>
+                            ))}
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4">
+                            {activeTab === 'apps' && (
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-gray-700 rounded-lg text-center border-2 border-dashed border-gray-500 cursor-pointer hover:border-blue-400" onClick={installApp}>
+                                        <Icons.Upload className="w-8 h-8 mx-auto mb-2 text-gray-400"/>
+                                        <div className="text-sm">Click to Upload APK</div>
+                                        <div className="text-xs text-gray-500 mt-1">{isProcessing ? 'Installing...' : 'Drag & Drop supported'}</div>
+                                    </div>
+                                    
+                                    <div className="text-sm font-bold text-gray-400 mt-4">INSTALLED APPS</div>
+                                    {installedApps.map(app => (
+                                        <div key={app.id} className="flex justify-between items-center p-3 bg-gray-700 rounded">
+                                            <span>{app.name}</span>
+                                            <button className="text-red-400 hover:text-white"><Icons.X className="w-4 h-4"/></button>
+                                        </div>
+                                    ))}
+                                    {installedApps.length === 0 && <div className="text-gray-500 text-sm italic">No apps installed.</div>}
+                                </div>
+                            )}
+
+                            {activeTab === 'proxy' && (
+                                <div className="space-y-4">
+                                    <div className="bg-gray-900 p-3 rounded font-mono text-sm">
+                                        <div className="text-gray-500">Host IP</div>
+                                        <div className="text-blue-400">127.0.0.1</div>
+                                        <div className="text-gray-500 mt-2">Port</div>
+                                        <div className="text-blue-400">8080</div>
+                                    </div>
+                                    <button 
+                                        onClick={() => setProxyEnabled(!proxyEnabled)}
+                                        className={`w-full py-2 rounded font-bold flex justify-center gap-2 items-center ${proxyEnabled ? 'bg-green-600' : 'bg-gray-600'}`}
+                                    >
+                                        <Icons.Shield className="w-4 h-4"/>
+                                        {proxyEnabled ? 'Proxy Enabled' : 'Enable Proxy'}
+                                    </button>
+                                    <div className="text-xs text-gray-400">
+                                        Use Burp Suite or MITMProxy to intercept traffic. Certificate installation required for HTTPS.
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'traffic' && (
+                                <div className="space-y-2">
+                                    <div className="flex justify-between mb-2">
+                                        <button onClick={() => setTraffic([])} className="text-xs text-gray-400 hover:text-white">Clear</button>
+                                        <button onClick={() => setCaptureTraffic(!captureTraffic)} className={`text-xs px-2 py-1 rounded ${captureTraffic ? 'bg-red-600' : 'bg-green-600'}`}>
+                                            {captureTraffic ? 'Stop Capture' : 'Start Capture'}
+                                        </button>
+                                    </div>
+                                    {traffic.length === 0 && <div className="text-center text-gray-500 text-sm mt-10">No traffic captured</div>}
+                                    {traffic.map(t => (
+                                        <div key={t.id} className="p-2 bg-gray-900 rounded text-xs border-l-2 border-blue-500">
+                                            <div className="flex justify-between font-bold">
+                                                <span className={t.method === 'GET' ? 'text-blue-400' : 'text-green-400'}>{t.method}</span>
+                                                <span className={t.status >= 400 ? 'text-red-400' : 'text-green-400'}>{t.status}</span>
+                                            </div>
+                                            <div className="truncate text-gray-400 my-1">{t.url}</div>
+                                            <div className="text-right text-gray-500">{t.size}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {activeTab === 'logs' && (
+                                <div className="font-mono text-xs space-y-1">
+                                    {logs.map((l, i) => (
+                                        <div key={i} className="text-gray-300 border-b border-gray-700 pb-1">{l}</div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AndroidEmulator />);
+    </script>
+</body>
+</html>
